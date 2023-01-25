@@ -12,7 +12,7 @@ import java.util.Map;
  * @version : 1.0.0
  * @date : 2023/01/19
  */
-public class RequestMappingHandlerMapping {
+public class RequestMappingHandlerMapping implements HandlerMapping{
     private final Map<HandlerKey, Controller> mappings = new HashMap<>();
 
     void init(){

@@ -30,15 +30,21 @@ public class DispatcherServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(DispatcherServlet.class);
 
-    private RequestMappingHandlerMapping rmhm;
+    private HandlerMapping handlerMapping;
 
     private List<ViewResolver> viewResolvers;
 
+    private List<HandlerAdapter> handlerAdapters;
+
     @Override
     public void init() throws ServletException {
-        rmhm = new RequestMappingHandlerMapping();
-        rmhm.init();
+        RequestMappingHandlerMapping requestMappingHandlerMapping = new RequestMappingHandlerMapping();
+        requestMappingHandlerMapping.init();
 
+        handlerMapping = requestMappingHandlerMapping;
+        //handler adapter
+        handlerAdapters = List.of(new SimpleControllerHandlerAdapter());
+        // view resolver
         viewResolvers = Collections.singletonList(new JspViewResolver());
     }
 
@@ -46,14 +52,19 @@ public class DispatcherServlet extends HttpServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.info("[DispatcherServlet] service started");
         try {
-            Controller handler = rmhm.findHandler(new HandlerKey(RequestMethod.valueOf(request.getMethod()),request.getRequestURI()));
-            String viewName = handler.handleRequest(request, response);
+            Object handler = handlerMapping.findHandler(new HandlerKey(RequestMethod.valueOf(request.getMethod()),request.getRequestURI()));
 
-            // redirect:/users 라고 요청 올 경우 처리 X
-            // 즉 forward, redirect 구분해주어야 한다.
+            HandlerAdapter handlerAdapter = handlerAdapters.stream()
+                    .filter(ha -> ha.supports(handler))
+                    .findFirst()
+                    .orElseThrow(() -> new ServletException("no adapter for handler is "+ handler));
+
+            ModelAndView modelAndView = handlerAdapter.handle(request,response,handler);
+
+
             for(ViewResolver viewResolver: viewResolvers){
-                View view = viewResolver.resolveView(viewName);
-                view.render(new HashMap<>(),request, response);
+                View view = viewResolver.resolveView(modelAndView.getViewName());
+                view.render(modelAndView.getModel(),request, response);
             }
 
         } catch (Exception e) {
