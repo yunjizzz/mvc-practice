@@ -1,6 +1,8 @@
 package org.example;
 
 import org.example.controller.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,17 +14,22 @@ import java.util.Map;
  * @version : 1.0.0
  * @date : 2023/01/19
  */
-public class RequestMappingHandlerMapping implements HandlerMapping{
-    private final Map<HandlerKey, Controller> mappings = new HashMap<>();
+public class RequestMappingHandlerMapping implements HandlerMapping {
+    private static final Logger logger = LoggerFactory.getLogger(DispatcherServlet.class);
+    private Map<HandlerKey, Controller> mappings = new HashMap<>();
 
-    void init(){
-        mappings.put(new HandlerKey(RequestMethod.GET,"/"), new HomeController());
-        mappings.put(new HandlerKey(RequestMethod.GET,"/users"), new UserListController());
-        mappings.put(new HandlerKey(RequestMethod.POST,"/users"), new UserCreateController());
-        mappings.put(new HandlerKey(RequestMethod.GET, "/user/form"), new ForwardController("/user/form"));
+    void init() {
+//        mappings.put(new HandlerKey("/", RequestMethod.GET), new HomeController());
+        mappings.put(new HandlerKey("/user/form", RequestMethod.GET), new ForwardController("/user/form"));
+        mappings.put(new HandlerKey("/users", RequestMethod.GET), new UserListController());
+        mappings.put(new HandlerKey("/users", RequestMethod.POST), new UserCreateController());
+
+        mappings.keySet().forEach(path ->
+                logger.info("url path: [{}], controller: [{}]", path, mappings.get(path).getClass()));
     }
-    public Controller findHandler(HandlerKey handlerKey)
-    {
+
+    @Override
+    public Controller findHandler(HandlerKey handlerKey) {
         return mappings.get(handlerKey);
     }
 }

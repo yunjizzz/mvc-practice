@@ -8,5 +8,5 @@ package org.example.view;
  * @date : 2023/01/25
  */
 public interface ViewResolver {
-    View resolveView(String viewName);
+    View resolveViewName(String viewName);
 }

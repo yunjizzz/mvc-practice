@@ -1,0 +1,31 @@
+package org.example;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
+/**
+ * 어노테이션 핸들러
+ *
+ * @author : yunji
+ * @version : 1.0.0
+ * @date : 2023/01/25
+ */
+
+public class AnnotationHandler {
+    private final Class<?> clazz;
+    private final Method targetMethod;
+
+    public AnnotationHandler(Class<?> clazz, Method targetMethod) {
+        this.clazz = clazz;
+        this.targetMethod = targetMethod;
+    }
+
+    public String handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Constructor<?> defaultConstructor = clazz.getDeclaredConstructor();
+        Object targetObject = defaultConstructor.newInstance();
+
+        return (String) targetMethod.invoke(targetObject, request, response);
+    }
+}
