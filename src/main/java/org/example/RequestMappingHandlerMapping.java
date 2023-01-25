@@ -1,28 +1,28 @@
 package org.example;
 
-import org.apache.catalina.User;
-import org.example.controller.Controller;
-import org.example.controller.HomeController;
-import org.example.controller.UserListController;
+import org.example.controller.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 클래스 설명
+ * Handler mapping
  *
  * @author : yunji
  * @version : 1.0.0
  * @date : 2023/01/19
  */
 public class RequestMappingHandlerMapping {
-    private final Map<String, Controller> mappings = new HashMap<>();
+    private final Map<HandlerKey, Controller> mappings = new HashMap<>();
 
     void init(){
-        mappings.put("/", new HomeController());
-        mappings.put("/users", new UserListController());
+        mappings.put(new HandlerKey(RequestMethod.GET,"/"), new HomeController());
+        mappings.put(new HandlerKey(RequestMethod.GET,"/users"), new UserListController());
+        mappings.put(new HandlerKey(RequestMethod.POST,"/users"), new UserCreateController());
+        mappings.put(new HandlerKey(RequestMethod.GET, "/user/form"), new ForwardController("/user/form"));
     }
-    public Controller findHandler(String uriPath){
-        return mappings.get(uriPath);
+    public Controller findHandler(HandlerKey handlerKey)
+    {
+        return mappings.get(handlerKey);
     }
 }
